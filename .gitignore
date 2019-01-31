@@ -1,0 +1,6 @@
+elm-stuff/
+repl-temp-*
+elm.js 
+
+# just for elm-format to work: 
+src/elm.json
