@@ -1,4 +1,4 @@
-module Polynomial exposing (Polynomial, derivative, eval, fromCoefficients, toString)
+module Polynomial exposing (Polynomial, derivative, eval, fromCoefficients, toString, zero)
 
 import Array exposing (Array)
 
@@ -32,6 +32,27 @@ derivative p =
             List.drop 1 p
     in
     List.map2 (*) newCoeff multWith
+
+
+zero : Polynomial -> Float -> Float
+zero p guess =
+    newton p 1000 guess
+
+
+newton : Polynomial -> Int -> Float -> Float
+newton p depth guess =
+    if depth <= 0 then
+        0 / 0
+
+    else if abs (eval p guess) <= 0.0000000001 then
+        guess
+
+    else
+        let
+            newguess =
+                guess - eval p guess / eval (derivative p) guess
+        in
+        newton p (depth - 1) newguess
 
 
 toString : Polynomial -> String

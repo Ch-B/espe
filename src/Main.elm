@@ -17,7 +17,7 @@ type alias Model =
 initialModel : Model
 initialModel =
     { count = 0
-    , p = P.fromCoefficients [ 0.2, -1, -3 ]
+    , p = P.fromCoefficients [ 0.5, 0, 0 ]
     }
 
 
@@ -77,6 +77,8 @@ view model =
         , div [] [ Html.text <| "f(x) = " ++ P.toString model.p ]
         , div [] []
         , div [] [ Html.text <| "f'(x) = " ++ (P.toString <| P.derivative model.p) ]
+        , div [] []
+        , div [] [ Html.text <| "f(x) = 0 at x = " ++ (String.fromFloat <| P.zero model.p -5.0) ]
         , div [] []
         , svg [ SAttr.width "1000", SAttr.height "500", SAttr.viewBox "0 0 1000 500" ]
             [ rect
