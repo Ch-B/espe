@@ -17,7 +17,7 @@ type alias Model =
 initialModel : Model
 initialModel =
     { count = 0
-    , p = [ 0.25, -1, -1 ]
+    , p = P.fromCoefficients [ 0.2, -1, -3 ]
     }
 
 
@@ -73,7 +73,11 @@ view model =
         [ button [ onClick Increment ] [ Html.text "+1" ]
         , div [] [ Html.text <| String.fromInt model.count ]
         , button [ onClick Decrement ] [ Html.text "-1" ]
-        , div [] [ Html.text <| String.fromFloat <| P.eval model.p (toFloat model.count) ]
+        , div [] []
+        , div [] [ Html.text <| "f(x) = " ++ P.toString model.p ]
+        , div [] []
+        , div [] [ Html.text <| "f'(x) = " ++ (P.toString <| P.derivative model.p) ]
+        , div [] []
         , svg [ SAttr.width "1000", SAttr.height "500", SAttr.viewBox "0 0 1000 500" ]
             [ rect
                 [ SAttr.x "1"
@@ -97,6 +101,13 @@ view model =
             , Svg.text_ [ SAttr.x "505", SAttr.y "495" ] [ Svg.text "-5" ]
             , path
                 [ SAttr.d <| evalP model.p
+                , SAttr.stroke "blue"
+                , SAttr.strokeWidth "3"
+                , SAttr.fill "None"
+                ]
+                []
+            , path
+                [ SAttr.d <| evalP <| P.derivative model.p
                 , SAttr.stroke "green"
                 , SAttr.strokeWidth "3"
                 , SAttr.fill "None"
