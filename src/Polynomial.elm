@@ -1,6 +1,10 @@
-module Polynomial exposing (Polynomial, derivative, eval, fromCoefficients, toString, zero)
+module Polynomial exposing (Polynomial, averagePairs, derivative, eval, fromCoefficients, specialPoints, toString, zero)
 
 import Array exposing (Array)
+
+
+epsilon =
+    0.0000000001
 
 
 type alias Polynomial =
@@ -10,6 +14,27 @@ type alias Polynomial =
 fromCoefficients : List Float -> Polynomial
 fromCoefficients list =
     List.reverse list
+
+
+toString : Polynomial -> String
+toString p =
+    let
+        coefficientList =
+            List.map (\x -> "(" ++ String.fromFloat x ++ ")") p
+
+        powersOfX =
+            List.reverse <| List.map String.fromInt <| List.range 1 <| List.length p - 1
+
+        powersOfXWithX =
+            List.map (\x -> String.append "x^" x) powersOfX
+
+        powersOfXWithConstTerm =
+            powersOfXWithX ++ [ "" ]
+
+        terms =
+            List.map2 (++) (List.reverse coefficientList) powersOfXWithConstTerm
+    in
+    String.join "+" terms
 
 
 horner : Float -> Float -> Float -> Float
@@ -34,17 +59,12 @@ derivative p =
     List.map2 (*) newCoeff multWith
 
 
-zero : Polynomial -> Float -> Float
-zero p guess =
-    newton p 1000 guess
-
-
 newton : Polynomial -> Int -> Float -> Float
 newton p depth guess =
     if depth <= 0 then
         0 / 0
 
-    else if abs (eval p guess) <= 0.0000000001 then
+    else if abs (eval p guess) <= epsilon then
         guess
 
     else
@@ -55,22 +75,48 @@ newton p depth guess =
         newton p (depth - 1) newguess
 
 
-toString : Polynomial -> String
-toString p =
+zero : Polynomial -> Float -> Float
+zero p guess =
+    newton p 1000 guess
+
+
+averagePairs : List Float -> List Float
+averagePairs list =
+    case list of
+        [] ->
+            []
+
+        only :: [] ->
+            []
+
+        a :: b :: rest ->
+            0.5 * (a + b) :: averagePairs (b :: rest)
+
+
+type alias SpecialPoints =
+    { zeroes : List Float, extrema : List Float, inflexions : List Float }
+
+
+specialPoints : Polynomial -> SpecialPoints
+specialPoints p =
     let
-        coefficientList =
-            List.map (\x -> "(" ++ String.fromFloat x ++ ")") p
-
-        powersOfX =
-            List.reverse <| List.map String.fromInt <| List.range 1 <| List.length p - 1
-
-        powersOfXWithX =
-            List.map (\x -> String.append "x^" x) powersOfX
-
-        powersOfXWithConstTerm =
-            powersOfXWithX ++ [ "" ]
-
-        terms =
-            List.map2 (++) (List.reverse coefficientList) powersOfXWithConstTerm
+        findBetween : List Float -> List Float
+        findBetween list =
+            List.map (zero p) (averagePairs list)
     in
-    String.join "+" terms
+    case p of
+        [] ->
+            { zeroes = [], extrema = [], inflexions = [] }
+
+        [ a ] ->
+            { zeroes = [], extrema = [], inflexions = [] }
+
+        [ a, b ] ->
+            { zeroes = [ -a / b ], extrema = [], inflexions = [] }
+
+        _ ->
+            let
+                s =
+                    specialPoints (derivative p)
+            in
+            { zeroes = findBetween ([ -1.0e10 ] ++ s.zeroes ++ [ 1.0e10 ]), extrema = s.zeroes, inflexions = s.extrema }
